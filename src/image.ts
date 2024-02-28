@@ -22,3 +22,28 @@ export function loadImage(url: string): Promise<HTMLImageElement> {
     img.src = url;
   });
 }
+
+export function readDataUrlFromBlob(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function loadUrlToFile(url: string): Promise<File> {
+  // Fetch the resource from the URL
+  const response = await fetch(url);
+  // Check if the response was successful (status 200)
+  if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+  // Get the blob representation of the file
+  const blob = await response.blob();
+  const fileName = url.split('/').pop()!;
+  // Create a File object from the blob (this is not strictly necessary,
+  // as you could work with the blob directly, but if you need a File object...)
+  return new File([blob], fileName, {
+    type: blob.type,
+    lastModified: Date.now()
+  });
+}
